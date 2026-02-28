@@ -3,46 +3,54 @@ const fs = require("fs");
 const path = require("path");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 const DATA_FILE = path.join(__dirname, "data.json");
 
+/* CREATE DATA FILE IF NOT EXISTS */
 if (!fs.existsSync(DATA_FILE)) {
     fs.writeFileSync(DATA_FILE, JSON.stringify({ users: [] }, null, 2));
 }
 
+/* READ DATA */
 function readData() {
     const raw = fs.readFileSync(DATA_FILE);
     return JSON.parse(raw);
 }
 
+/* WRITE DATA */
 function writeData(data) {
     fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
-/* REGISTER */
+/* ================= REGISTER ================= */
 app.post("/register", (req, res) => {
     const { email, password } = req.body;
     const data = readData();
 
+    if (!email || !password) {
+        return res.json({ success: false, message: "Missing fields" });
+    }
+
     if (data.users.find(u => u.email === email)) {
-        return res.json({ success: false, message: "User exists" });
+        return res.json({ success: false, message: "User already exists" });
     }
 
     data.users.push({
         email,
         password,
-        entries: []
+        entries: [],
+        journals: []
     });
 
     writeData(data);
     res.json({ success: true });
 });
 
-/* LOGIN */
+/* ================= LOGIN ================= */
 app.post("/login", (req, res) => {
     const { email, password } = req.body;
     const data = readData();
@@ -51,12 +59,14 @@ app.post("/login", (req, res) => {
         u => u.email === email && u.password === password
     );
 
-    if (!user) return res.json({ success: false });
+    if (!user) {
+        return res.json({ success: false });
+    }
 
     res.json({ success: true });
 });
 
-/* SAVE ENTRY (Mood + Sleep + Stress) */
+/* ================= SAVE MOOD ENTRY ================= */
 app.post("/saveEntry", (req, res) => {
     const { email, mood, sleep, stress } = req.body;
     const data = readData();
@@ -75,7 +85,7 @@ app.post("/saveEntry", (req, res) => {
     res.json({ success: true });
 });
 
-/* GET ENTRIES */
+/* ================= GET ENTRIES ================= */
 app.get("/getEntries/:email", (req, res) => {
     const data = readData();
     const user = data.users.find(u => u.email === req.params.email);
@@ -85,18 +95,13 @@ app.get("/getEntries/:email", (req, res) => {
     res.json(user.entries);
 });
 
-app.listen(PORT, () => {
-    console.log("🚀 Server running at http://localhost:3000");
-});
-/* SAVE JOURNAL */
+/* ================= SAVE JOURNAL ================= */
 app.post("/saveJournal", (req, res) => {
     const { email, text } = req.body;
     const data = readData();
 
     const user = data.users.find(u => u.email === email);
     if (!user) return res.json({ success: false });
-
-    if (!user.journals) user.journals = [];
 
     user.journals.push({
         text,
@@ -107,12 +112,17 @@ app.post("/saveJournal", (req, res) => {
     res.json({ success: true });
 });
 
-/* GET JOURNALS */
+/* ================= GET JOURNALS ================= */
 app.get("/getJournals/:email", (req, res) => {
     const data = readData();
     const user = data.users.find(u => u.email === req.params.email);
 
-    if (!user || !user.journals) return res.json([]);
+    if (!user) return res.json([]);
 
     res.json(user.journals);
+});
+
+/* ================= START SERVER ================= */
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
 });
