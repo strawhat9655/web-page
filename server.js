@@ -121,8 +121,11 @@ app.get("/getJournals/:email", (req, res) => {
 
     res.json(user.journals);
 });
-
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/public/index.html");
+});
 /* ================= START SERVER ================= */
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
+
