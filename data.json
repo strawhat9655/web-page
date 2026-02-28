@@ -1,0 +1,44 @@
+{
+  "users": [
+    {
+      "email": "none965500@gmail.com",
+      "password": "luffy",
+      "entries": [
+        {
+          "mood": "😡 Angry",
+          "sleep": "7",
+          "stress": "5",
+          "date": "2026-02-28T21:59:42.821Z"
+        },
+        {
+          "mood": "😡 Angry",
+          "sleep": "3",
+          "stress": "4",
+          "date": "2026-02-28T22:05:44.334Z"
+        },
+        {
+          "mood": "😔 Sad",
+          "sleep": "0",
+          "stress": "20",
+          "date": "2026-02-28T22:12:18.263Z"
+        },
+        {
+          "mood": "😴 Tired",
+          "sleep": "2",
+          "stress": "7",
+          "date": "2026-02-28T22:18:40.694Z"
+        }
+      ],
+      "journals": [
+        {
+          "text": "hi i am happy today",
+          "date": "2026-02-28T22:13:22.658Z"
+        },
+        {
+          "text": "none",
+          "date": "2026-02-28T22:18:52.697Z"
+        }
+      ]
+    }
+  ]
+}
