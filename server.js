@@ -6,25 +6,32 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from public folder
 app.use(express.static(path.join(__dirname, "public")));
 
 const DATA_FILE = path.join(__dirname, "data.json");
 
-/* CREATE DATA FILE IF NOT EXISTS */
+/* Create data.json if not exists */
 if (!fs.existsSync(DATA_FILE)) {
     fs.writeFileSync(DATA_FILE, JSON.stringify({ users: [] }, null, 2));
 }
 
-/* READ DATA */
+/* Read data */
 function readData() {
-    const raw = fs.readFileSync(DATA_FILE);
-    return JSON.parse(raw);
+    return JSON.parse(fs.readFileSync(DATA_FILE));
 }
 
-/* WRITE DATA */
+/* Write data */
 function writeData(data) {
     fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
+
+/* ================= ROOT ROUTE FIX ================= */
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 /* ================= REGISTER ================= */
 app.post("/register", (req, res) => {
@@ -66,7 +73,7 @@ app.post("/login", (req, res) => {
     res.json({ success: true });
 });
 
-/* ================= SAVE MOOD ENTRY ================= */
+/* ================= SAVE ENTRY ================= */
 app.post("/saveEntry", (req, res) => {
     const { email, mood, sleep, stress } = req.body;
     const data = readData();
@@ -91,7 +98,6 @@ app.get("/getEntries/:email", (req, res) => {
     const user = data.users.find(u => u.email === req.params.email);
 
     if (!user) return res.json([]);
-
     res.json(user.entries);
 });
 
@@ -118,14 +124,10 @@ app.get("/getJournals/:email", (req, res) => {
     const user = data.users.find(u => u.email === req.params.email);
 
     if (!user) return res.json([]);
-
     res.json(user.journals);
 });
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/public/index.html");
-});
+
 /* ================= START SERVER ================= */
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
-
